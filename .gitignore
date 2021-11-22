@@ -1,0 +1,9 @@
+# created by virtualenv automatically
+bin
+imgs
+Include
+Lib
+pip-selfcheck.json
+__pycache__
+pyvenv.cfg
+Scripts
