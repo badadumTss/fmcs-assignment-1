@@ -13,33 +13,35 @@ def research(fsm, bddspec):
     #seguo algoritmo
     reach = fsm.init
     new = fsm.init
-    seq = []
     while fsm.count_states(new) > 0:
         notResp = new.diff(bddspec)
         if fsm.count_states(notResp) > 0: #se qualcosa non rispetta
-            return fsm.pick_one_state(notResp), seq
-        seq.append(new)
+            return fsm.pick_one_state(notResp), reach
         new = (fsm.post(new)).diff(reach)
         reach = reach + new
-    return None, seq
+    return None, reach
 
-def go_back(fsm, node, sequence):
+def compute_path(fsm, parent, current):
+    inp_set = fsm.get_inputs_between_states(parent, current)
+    inp = fsm.pick_one_inputs(inp_set)
+    return parent, inp
+
+def go_back(fsm, node, reachable):
     current = node
-    iteration = 1
-    path = [current.get_str_values()]
-    while current not in fsm.pick_all_states(fsm.init):
-        iteration_before = iteration
-        consider = sequence[len(sequence) - iteration] # set in sequence to consider
-        for state in fsm.pick_all_states(consider):
-            inputs = fsm.get_inputs_between_states(state, current)
-            if inputs != None:
-                current = state
-                iteration += 1
-                path.insert(0, fsm.pick_one_inputs(inputs).get_str_values())
-                path.insert(0, current.get_str_values())
-                break
-        if iteration_before == iteration:
-            return []
+    init = fsm.init
+    path = current,
+    it = 1
+    while (current * init).is_false():
+        # intersection between the "back" set in the sequence and the
+        # pre-image of the current considered state, this way we can
+        # obtain all the nodes that are reachable and whose post image
+        # is the current node
+        parent_set = reachable.intersection(fsm.pre(current))
+        # pick one from this set
+        parent = fsm.pick_one_state(parent_set)
+        path = compute_path(fsm, parent, current) + path
+        current = parent
+        it += 1
     return path
 
 def check_explain_inv_spec(spec):
@@ -62,10 +64,14 @@ def check_explain_inv_spec(spec):
     """
     fsm = pynusmv.glob.prop_database().master.bddFsm
     bddspec = spec_to_bdd(fsm, spec)
-    node, sequence = research(fsm, bddspec) #ricerca per vedere se rispetta
+    node, reachable = research(fsm, bddspec) #ricerca per vedere se rispetta
     #funzione che costruisce l'albero e controllo su res
     if node is not None:
-        return False, go_back(fsm, node, sequence) # reachable(fsm, bddspec)
+        path = go_back(fsm, node, reachable) # returns tuple of nodes
+        str_path = ()
+        for element in path:
+            str_path = str_path + (element.get_str_values(), )
+        return False, str_path
     else:
         return True, None
 
