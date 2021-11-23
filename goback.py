@@ -13,20 +13,22 @@ def research(fsm, bddspec):
     #seguo algoritmo
     reach = fsm.init
     new = fsm.init
+    sequence = [fsm.init]
     while fsm.count_states(new) > 0:
-        notResp = new.diff(bddspec)
+        notResp = new - bddspec
         if fsm.count_states(notResp) > 0: #se qualcosa non rispetta
-            return fsm.pick_one_state(notResp), reach
-        new = (fsm.post(new)).diff(reach)
+            return fsm.pick_one_state_random(notResp), sequence
+        sequence.append(new)
+        new = fsm.post(new) - reach
         reach = reach + new
-    return None, reach
+    return None, sequence
 
 def compute_path(fsm, parent, current):
     inp_set = fsm.get_inputs_between_states(parent, current)
     inp = fsm.pick_one_inputs(inp_set)
     return parent, inp
 
-def go_back(fsm, node, reachable):
+def go_back(fsm, node, sequence):
     current = node
     init = fsm.init
     path = current,
@@ -36,9 +38,9 @@ def go_back(fsm, node, reachable):
         # pre-image of the current considered state, this way we can
         # obtain all the nodes that are reachable and whose post image
         # is the current node
-        parent_set = reachable.intersection(fsm.pre(current))
+        parent_region = sequence[-it] & fsm.pre(current)
         # pick one from this set
-        parent = fsm.pick_one_state(parent_set)
+        parent = fsm.pick_one_state_random(parent_region)
         path = compute_path(fsm, parent, current) + path
         current = parent
         it += 1
