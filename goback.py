@@ -13,7 +13,7 @@ def research(fsm, bddspec):
     #seguo algoritmo
     reach = fsm.init
     new = fsm.init
-    sequence = [fsm.init]
+    sequence = []
     while fsm.count_states(new) > 0:
         notResp = new - bddspec
         if fsm.count_states(notResp) > 0: #se qualcosa non rispetta
@@ -40,7 +40,7 @@ def go_back(fsm, node, sequence):
         # is the current node
         parent_region = sequence[-it] & fsm.pre(current)
         # pick one from this set
-        parent = fsm.pick_one_state_random(parent_region)
+        parent = fsm.pick_one_state(parent_region)
         path = compute_path(fsm, parent, current) + path
         current = parent
         it += 1
