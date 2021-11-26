@@ -4,7 +4,7 @@
 \author{
   Luca Zaninotto mat. 2057074 
   \and
-  David Faro mat. 
+  Davide Farinelli mat.2005758
   \and
   Matteo Budai mat. 2057217
 }
@@ -54,7 +54,7 @@
 \begin{document}
 \begin{abstract}
   Algorithm for invariant verification in a finite state model through
-  symbolic rappresentation of regions, using pynusmv to encode and
+  symbolic representation of regions, using pynusmv to encode and
   model the system itself
 \end{abstract}
 \maketitle
@@ -63,10 +63,10 @@
 \section{The algorithm}\label{algo}
 The algorithm we used to verify invariants in a finite state model is
 composed of two parts. The first part checks whether the invariant is
-respected or not, the second one, if the invariant is not respected
+respected or not; the second one, if the invariant is not respected
 provides a counterexample. The first part is a variant of the region
 exploration algorithm, the only difference is that instead of returning
-the set of reachable nodes returns the list of newly explored nodes,
+the set of reachable nodes, it returns the list of newly explored nodes,
 to allow the explanation algorithm to get a counterexample in a number
 of steps that is less than the number of newly explored regions to check
 the validity of the invariant.
@@ -91,9 +91,9 @@ Through pynusmv we can get the model described in a nusmv file, load it
 and access it through the \texttt{fsm} module. We initialize the
 reachable states (for the first step just the set of initital states)
 and the newly found states (again, for the first iteration the set of
-initial states). Sequence insted is the sequence of newly visited
+initial states). Sequence instead is the sequence of newly visited
 nodes. It is initialized as the empty list since at first there are no
-new nodes a part from the initial set. \texttt{bddspec} is the set of
+new nodes apart from the initial set. \texttt{bddspec} is the set of
 states in the system that satisfies the invariant, so by taking the
 difference between the new states and the bddspec we find a sybolic
 formula that identifies the nodes that do not satisfy the invariant
@@ -101,9 +101,9 @@ between the new nodes. If this set (\texttt{notResp}) is not empty we
 are done, we can just return one node contained in it and the sequence.
 Otherwise we update the sequence (we do this after checking
 whether a node invalidates the invariant so that when we go back to the
-first iteration works, more on that on \S\ref{back}) with the checked
+first iteration, works, more on that on \S\ref{back}) with the checked
 nodes and compute new nodes with the post image of new nodes,
-remembering to remove already reached nodes, this is both to explore
+remembering to remove already reached nodes; this is both to explore
 unexplored regions and to avoid cycles in the sequence. In fact, each
 node can appear only once in some set of the sequence. It cannot
 appear in a set after the one in which it appeared for the first time
@@ -130,9 +130,9 @@ def go_back(fsm, node, sequence):
 \end{lstlisting}
 We first initialize the current node to the given node (the one that
 does not respect the invariant), the path to a tuple containing just
-the node and a conuter to 1. Then, for each \texttt{current} node we
+the node and a counter to 1. Then, for each \texttt{current} node we
 first check whether it is in the set of inital states or not. If
-that's the case we are done, the path contians a real path from an
+that's the case we are done, the path contains a real path from an
 initial state to a state that invalidates the invariant. Otherwise we
 enter in the loop:
 \begin{enumerate}
@@ -150,10 +150,10 @@ enter in the loop:
   current node and append it to the path (the helper function just
   returns a tuple of the parent state and an input that from the
   parent node allows to go to the current state).
-\item Finally update the current node the the parent node and growing
+\item Finally update the current node to the parent node and growing
   the iteration number.
 \end{enumerate}
-The path returned is a tuple containing one after the other a state
+The path returned is a tuple containing, one after the other, a state
 and an input to go to the next state, where the first state is in the
 set of initial states, and the last one is a state where the
 considered invariant is not respected.
